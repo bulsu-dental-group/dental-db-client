@@ -244,9 +244,8 @@ export function MedicalHistory({route, navigation}){
 
     return (
         <View>
-            <Button title='Save changes' onPress={handleSubmit(updateHistory)} />
+            {!profile.is_patient && <Button title='Save changes' onPress={handleSubmit(updateHistory)} />}
             <MedicalHistoryForm control={control} isFemale={isFemale}  />
-            
         </View>
     )
 }
@@ -390,9 +389,9 @@ function MedicalHistoryForm({control, isFemale}){
                                         field.onChange(date)
                                     }} />
                                 )} /> }
-                            <Button title='Change' onPress={() => setShowDates(
+                            {!is_patient && <Button title='Change' onPress={() => setShowDates(
                                 showDates.map((showDate, j) => (i === j))
-                            )} />
+                            )} />}
                             <LabelTextInput label='Reason' name={`med_history_hospitalized[${i}].reason`} control={control} />
                             {!is_patient && <Button title='Delete' onPress={() => {
                                 hospital_remove(i)
@@ -453,7 +452,7 @@ function MedicalHistoryForm({control, isFemale}){
                     <Controller name={`medicine_allergy.${medAllergy.id}`} control={control}
                         defaultValue={false}
                         render={({field}) => (
-                            <Checkbox value={field.value} onValueChange={field.onChange} />
+                            <Checkbox style={{marginHorizontal: 10}} value={field.value} onValueChange={field.onChange} />
                         )} />
                     <Label>{medAllergy.name}</Label>
                 </View>
@@ -501,7 +500,7 @@ function MedicalHistoryForm({control, isFemale}){
                     <Controller name={`med_history_option.${medOption.id}`} control={control}
                         defaultValue={false}
                         render={({field}) => (
-                            <Checkbox value={field.value} onValueChange={field.onChange} />
+                            <Checkbox style={{marginHorizontal: 10}} value={field.value} onValueChange={field.onChange} />
                         )} />
                     <Label>{medOption.name}</Label>
                 </View>

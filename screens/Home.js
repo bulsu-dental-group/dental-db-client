@@ -113,7 +113,6 @@ function ClinicHome({navigation}){
             <Label>Welcome, {clinic.name}</Label>
             <Button onPress={() => navigation.navigate('Clinic Patient List')} title="Total Patients"/>
             <Button title="Scan new patient" onPress={() => navigation.navigate('Scan QR')}/>
-            <Button title="Patient(s) for recall" />
         </HomeView>
     )
 }
@@ -162,7 +161,7 @@ function PatientHome({navigation}){
     return (
         <HomeView>
             <Label>Good day, {patient.first_name}</Label>
-            <Button title={'Generate QR Code'} onPress={() => navigation.navigate('QR Code')}/>
+            <Button title='Generate QR Code' onPress={() => navigation.navigate('QR Code')}/>
             <Button title="Medical History" onPress={() => navigation.navigate('Medical History')}/>
             <Button title="Dental Practitioner" onPress={() => navigation.navigate('Dental Practitioner')}/>
             <Button title="Treatment Plan" onPress={() => navigation.navigate('Treatment Plan')}/>

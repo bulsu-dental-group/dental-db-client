@@ -3,6 +3,7 @@ import { useIsFocused } from '@react-navigation/native'
 import { View, Text } from 'react-native'
 
 import { Button, HomeView } from '../components/StyledComponents'
+import { Label } from '../components/LabelTextInput'
 
 import { supabase } from '../supabase'
 
@@ -46,17 +47,19 @@ export function ViewPatient({route, navigation}){
 
     return (
         <HomeView>
-            <Text>{patient.first_name} {patient.last_name}, {patient.age}</Text>
-            <Text style={{color: 'red'}}>Allergies: </Text>
+            <Label style={{alignSelf: 'center'}}>{patient.first_name} {patient.last_name}, {patient.age}</Label>
+            <Text style={{alignSelf: 'center', marginBottom: 5}}><Text style={{fontWeight: 'bold', color: 'red'}}>Allergies: </Text>
             {patient.patient_allergy?.map((allergy, i) => (
-                <Text key={i}>{allergy.name}</Text>
-            ))}
-            <Text>Email: {patient.email}</Text>
-            <Text>Birthdate: {patient.birth_date}</Text>
-            <Text>Address: {patient.street}, {patient.city}, {patient.province}</Text>
-            <Text>Gender: {{0: 'Not known', 1 : 'Male', 2 : 'Female', 3 : 'Others'}[patient.gender]}</Text>
-            <Text>Contact Number: {patient.contact_number}</Text>
-            <Text>Profession: {patient.profession}</Text>
+                <Text style={{color: 'black'}} key={i}>{allergy.name}
+                    {i < patient.patient_allergy.length - 1 && ', '}</Text>
+            ))}</Text>
+            
+            <Text><Text style={{fontWeight: 'bold'}}>Email: </Text>{patient.email}</Text>
+            <Text><Text style={{fontWeight: 'bold'}}>Birthdate: </Text>{patient.birth_date}</Text>
+            <Text><Text style={{fontWeight: 'bold'}}>Address: </Text>{patient.street}, {patient.city}, {patient.province}</Text>
+            <Text><Text style={{fontWeight: 'bold'}}>Gender: </Text>{{0: 'Not known', 1 : 'Male', 2 : 'Female', 3 : 'Others'}[patient.gender]}</Text>
+            <Text><Text style={{fontWeight: 'bold'}}>Contact Number: </Text>{patient.contact_number}</Text>
+            <Text><Text style={{fontWeight: 'bold'}}>Profession: </Text>{patient.profession}</Text>
             <Button title="Medical History" onPress={() => navigation.navigate('Medical History', {
                 id: patient_id
             })}/>

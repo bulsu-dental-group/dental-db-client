@@ -7,7 +7,7 @@ import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
 
 import { Label, LabelTextInput } from '../components/LabelTextInput'
-import { Button, ListItemView, ListItemText } from '../components/StyledComponents'
+import { Button, ListItemView, ListItemText, Bold } from '../components/StyledComponents'
 
 export function TreatmentPlans({route, navigation}){
     const isFocused = useIsFocused()
@@ -23,6 +23,7 @@ export function TreatmentPlans({route, navigation}){
                     id,
                     name,
                     duration,
+                    created_at,
                     procedure (
                         id,
                         name
@@ -77,25 +78,13 @@ export function TreatmentPlans({route, navigation}){
 
     async function deleteTreatmentPlan(i){
         try {
-            const { error : deleteTreatProcErr } = await supabase.from('treatment_plan_procedure')
-                .delete()
-                .eq('treatment_plan_id', treatmentPlans[i].id)
-            if (deleteTreatProcErr)
-                throw deleteTreatProcErr
-
-            const { error : deleteProcedureErr } = await supabase.from('procedure')
-                .delete()
-                .match('id', treatmentPlans[i].procedure.map((proc, j) => (proc.id)))
-            if (deleteProcedureErr)
-                throw deleteProcedureErr
-
             const { error : deleteTreatErr } = await supabase.from('treatment_plan')
                 .delete()
                 .eq('id', treatmentPlans[i].id)
             if (deleteTreatErr)
                 throw deleteTreatErr
 
-            setTreatmentPlans(treatmentPlans.filter((treat, j) => i !== j))
+            setTreatmentPlans(treatmentPlans.filter((_, j) => i !== j))
         } catch (error){
             console.log(error)
         }
@@ -114,26 +103,29 @@ export function TreatmentPlans({route, navigation}){
         <View>
             {treatmentPlans.map((treatmentPlan, i) => (
                 <ListItemView key={i}>
-                    <View>
-                        <ListItemText>Name: {treatmentPlan.name}</ListItemText>
-                        <ListItemText>Duration: {treatmentPlan.duration}</ListItemText>
-                        <ListItemText>Procedures: </ListItemText>
+                    <View style={{flex: 4}}>
+                        <ListItemText><Bold>Treatment name: </Bold>{treatmentPlan.name}</ListItemText>
+                        <ListItemText><Bold>Duration: </Bold>{treatmentPlan.duration}</ListItemText>
+                        <ListItemText><Bold>Created at: </Bold>{treatmentPlan.created_at}</ListItemText>
+                        <ListItemText><Bold>Procedures: </Bold></ListItemText>
                         {treatmentPlan.procedure.map((proc, j) => (
-                            <Text key={j}>{proc.name}</Text>
+                            <ListItemText key={j}>{proc.name}</ListItemText>
                         ))}
                     </View>
-                    {!profile.is_patient && <Button title='Delete' onPress={() => deleteTreatmentPlan(i)} />}
+                    {!profile.is_patient && <Button style={{flex: 1}} title='Delete' onPress={() => deleteTreatmentPlan(i)} />}
                 </ListItemView>
             ))}
             {!profile.is_patient && (
                 <View>
                     <Label>New treatment plan</Label>
-                    <LabelTextInput name='name' label='Name' control={control} />
+                    <LabelTextInput name='name' label='Treatment Name' control={control} 
+                        rules={{required: 'Field required'}}/>
                     <LabelTextInput name='duration' label='Duration' control={control} />
                     <Label>Procedure</Label>
                     { fields.map((item, i) => (
                         <View key={i}>
-                            <LabelTextInput name={`procedures[${i}].name`} control={control} />
+                            <LabelTextInput name={`procedures[${i}].name`} control={control} 
+                                rules={{required: 'Empty procedure not valid'}}/>
                             <Button title='Delete' onPress={() => remove(i)} />
                         </View>
                     ))}

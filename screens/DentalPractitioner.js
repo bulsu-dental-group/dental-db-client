@@ -5,13 +5,14 @@ import RNPickerSelect from 'react-native-picker-select'
 
 import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
+import { HomeView, ListItemText } from '../components/StyledComponents'
 
 export function DentalPractitioner({route, navigation}){
     const { profile } = useContext(ProfileContext)
     const isFocused = useIsFocused()
     const [assigned, setAssigned] = useState({})
     const [practitioners, setPractitioners] = useState([])
-    const [pickPractitioner, setPickPractitioner] = useState('')
+    const [pickPractitioner, setPickPractitioner] = useState({})
 
     async function fetchAssigned(patient_id){
         try {
@@ -58,7 +59,7 @@ export function DentalPractitioner({route, navigation}){
     async function updateAssigned(){
         try {
             const { data, error } = await supabase.from('clinic_patient')
-                .update({dental_practitioner_id : pickPractitioner})
+                .update({dental_practitioner_id : pickPractitioner.id})
                 .match({
                     clinic_id: profile.clinic_id,
                     patient_id: route.params.id
@@ -67,7 +68,7 @@ export function DentalPractitioner({route, navigation}){
             if (error)
                 throw error
             if (data)
-                setAssigned(data)
+                setAssigned({...pickPractitioner})
         } catch (error){
             console.log(error)
         }
@@ -79,6 +80,7 @@ export function DentalPractitioner({route, navigation}){
         else {
             fetchAssigned(route.params.id)
             fetchPractitioners()
+            setPickPractitioner({...assigned})
         }
     }
 
@@ -88,7 +90,7 @@ export function DentalPractitioner({route, navigation}){
     }, [isFocused])
 
     return (
-        <View>
+        <HomeView>
             <Text>Assigned Dental Practitioner</Text>
             {assigned ? (
                 <>
@@ -101,13 +103,14 @@ export function DentalPractitioner({route, navigation}){
                     <Text>Change assigned dental practitioner</Text>
                     <RNPickerSelect value={pickPractitioner}
                         onValueChange={(item, i) => setPickPractitioner(item)}
+                        style={{ inputAndroid: { color: 'black' } }}
                         items={practitioners.map((practitioner, i) => ({
                             label: `${practitioner.first_name} ${practitioner.last_name}`,
-                            value: practitioner.id
+                            value: practitioner
                         }))} />
                     <Button title='Update' onPress={updateAssigned} />
                 </>
             )}
-        </View>
+        </HomeView>
     )
 }

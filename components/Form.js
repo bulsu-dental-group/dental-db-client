@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
 
 import { Label, LabelTextInput } from './LabelTextInput'
-    import RNPickerSelect from 'react-native-picker-select'
+import RNPickerSelect from 'react-native-picker-select'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { View, Button, ScrollView } from 'react-native';
+import { View, Button} from 'react-native'
+import RadioButtonGroup, { RadioButtonItem } from 'expo-radio-button'
 
-export function Form({isPatient}){
+export function Form({isPatient, isEdit}){
     const { control, watch } = useFormContext()
     const [showDate, setShowDate] = useState(false)
     const { fields : allergies, append : allergy_append, remove : allergy_remove } = useFieldArray({name: 'allergies'})
@@ -18,7 +19,7 @@ export function Form({isPatient}){
     }, [dentist_append])
 
     return (
-        <ScrollView>
+        <View>
         { isPatient ? (
             <>
                 <LabelTextInput name='first_name' label='First name' control={control} />
@@ -36,6 +37,7 @@ export function Form({isPatient}){
                 <Label>Gender</Label>
                 <Controller control={control} render={({ field: {onChange, ...props} }) => (
                     <RNPickerSelect {...props} onValueChange={(value) => onChange(value)}
+                    style={{ inputAndroid: { color: 'black' } }}
                     items={[
                         { label: 'Male', value: 1 },
                         { label: 'Female', value: 2},
@@ -56,7 +58,7 @@ export function Form({isPatient}){
         <LabelTextInput name='contact_number' label='Contact number' control={control} keyboardType='numeric'
             rules={{pattern: {value: /[0-9]+/, message: 'Numeric only'}}}/>
         <Label>Address</Label>
-        <LabelTextInput name='street' label='Street' control={control} rules={{required: true}}/>
+        <LabelTextInput name='street' label='Street (and Barangay/Avenue if applicable)' control={control} rules={{required: true}}/>
         <LabelTextInput name='city' label='City' control={control} rules={{required: true}}/>
         <LabelTextInput name='province' label='Province' control={control} rules={{required: true}}/>
         { isPatient && <LabelTextInput name='profession' label='Profession' control={control} /> }
@@ -72,7 +74,7 @@ export function Form({isPatient}){
                 <Button title='Add allergy' onPress={() => allergy_append({name: ''})} />
             </>
         ) : (
-            <>
+            !isEdit && <>
                 <Label>Dental Practitioners</Label>
                 {dentists.map((dentist, i) => (
                     <View key={i} style={{flexDirection: 'row'}}>
@@ -88,6 +90,6 @@ export function Form({isPatient}){
                 <Button title='Add' onPress={() => dentist_append({first_name: '', last_name: '', pcr_id: ''})} />
             </>
         )}
-    </ScrollView>
+    </View>
     )
 }

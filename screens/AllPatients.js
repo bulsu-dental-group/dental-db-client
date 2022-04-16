@@ -31,22 +31,21 @@ export function AllPatients({navigation}){
             setClinicPatients(clinic_patients.map((clinic_patient) => (
                 clinic_patient.patient_id
             )))
-            console.log(clinic_patients)
         } catch (error){
             console.log(error)
         }
     }
 
-    async function addPatient(i){
+    async function addPatient(id){
         try {
-            const { data, error } = await supabase.from('clinic_patient')
+            const { error } = await supabase.from('clinic_patient')
                 .insert([{
                     clinic_id: profile.clinic_id,
-                    patient_id: patients[i].id
+                    patient_id: id
                 }])
             if (error)
                 throw error
-            setClinicPatients([...clinicPatients, patients[i].id])
+            setClinicPatients([...clinicPatients, id])
         } catch (error){
             throw error
         }
@@ -68,16 +67,16 @@ export function AllPatients({navigation}){
 
     return (
         <View>
-            <View style={{flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row', margin: 10}}>
                 <Text>Search: </Text>
-                <StyledTextInput onChangeText={text => filterName(text)} />
+                <StyledTextInput style={{flex: 4}} onChangeText={text => filterName(text)} />
             </View>
             {patientView.map((patient, i) => (
                 <ListItemView key={i}>
                     <ListItemText style={{flex: 5}}>{patient.first_name} {patient.last_name}</ListItemText>
-                    {patient.id in clinicPatients ? 
+                    {clinicPatients.includes(patient.id) ? 
                         <Button style={{flex: 1}} title='Already added' disabled={true} /> :
-                        <Button style={{flex: 1}} title='Add' onPress={() => addPatient(i)} />
+                        <Button style={{flex: 1}} title='Add' onPress={() => addPatient(patient.id)} />
                     }
                 </ListItemView>
             ))}

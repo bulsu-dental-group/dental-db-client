@@ -1,19 +1,34 @@
 import { useEffect, useContext } from 'react'
 import { useIsFocused } from '@react-navigation/native'
-import { Button } from 'react-native'
+import { Button, View, ScrollView } from 'react-native'
 import { useForm, FormProvider } from 'react-hook-form'
 
 import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
 
 import { Form } from '../components/Form'
+import { LabelTextInput, Label } from '../components/LabelTextInput'
+import { HomeView } from '../components/StyledComponents'
 
 export function EditProfile({navigation}){
     const isFocused = useIsFocused()
     const { profile } = useContext(ProfileContext)
 
-    const methods = useForm()
-    const { handleSubmit, reset, setValue } = methods
+    const methods = useForm({ 
+        defaultValues: {
+            dentists: []
+        }
+    })
+    const { handleSubmit, reset, setValue, control, watch } = methods
+    const dentists = watch('dentists')
+
+    const { control : dentistControl, handleSubmit : dentistHandleSubmit, reset : dentistReset } = useForm({
+        defaultValues: {
+            first_name: '',
+            last_name: '',
+            prc_id: ''
+        }
+    })
 
     async function fetchMeta(){
         try {
@@ -73,6 +88,7 @@ export function EditProfile({navigation}){
                     setValue('province', data.province)
                 const { data : dentists, error : dentistErr } = await supabase.from('dental_practitioner')
                     .select(`
+                        id,
                         first_name,
                         last_name,
                         prc_id
@@ -122,7 +138,7 @@ export function EditProfile({navigation}){
                     throw updateAllergyErr
 
             } else {
-                const { data : clinic, error : clinicErr } = await supabase.from('clinic').update(
+                const { error : clinicErr } = await supabase.from('clinic').update(
                     {
                         'name'          : form.name,
                         'street'        : form.street,
@@ -135,27 +151,65 @@ export function EditProfile({navigation}){
                     .single()
                 if (clinicErr)
                     throw clinicErr
-
-                const { error : deleteDentistErr } = await supabase.from('dental_practitioner')
-                    .delete()
-                    .eq('clinic_id', clinic.id)
-                if (deleteDentistErr)
-                    throw deleteDentistErr
-
-                const { error : updateDentistErr } = await supabase.from('dental_practitioner')
-                    .insert(form.dentists.map((dentist, i) => ({
-                        first_name: dentist.first_name,
-                        last_name: dentist.last_name,
-                        prc_id: dentist.prc_id,
-                        clinic_id: clinic.id
-                    })))
-                if (updateDentistErr)
-                    throw updateDentistErr
             }
         } catch (error){
             console.log(error)
         } finally {
             navigation.navigate('Home')
+        }
+    }
+
+    async function addPractitioner(form){
+        try {
+            const { error } = await supabase.from('dental_practitioner')
+                .insert([{
+                    first_name: form.first_name,
+                    last_name: form.last_name,
+                    prc_id: form.prc_id,
+                    clinic_id: profile.clinic_id
+                }])
+            if (error)
+                throw error
+            navigation.navigate('Home')
+        } catch (error){
+            console.log(error)
+        }
+    }
+
+    async function updatePractitioner(i){
+        try {
+            const { error } = await supabase.from('dental_practitioner')
+                .update({
+                    first_name: dentists[i].first_name,
+                    last_name: dentists[i].last_name,
+                    prc_id: dentists[i].prc_id
+                })
+                .eq('id', dentists[i].id)
+            if (error)
+                throw error
+            dentistReset()
+            navigation.navigate('Home')
+        } catch (error){
+            console.log(error)
+        }
+    }
+
+    async function deletePractitioner(i){
+        try {
+            const { error : deletePracPatientsErr } = await supabase.from('clinic_patient')
+                .delete()
+                .eq('dental_practitioner_id', dentists[i].id)
+            if (deletePracPatientsErr)
+                throw deletePracPatientsErr
+
+            const { error } = await supabase.from('dental_practitioner')
+                .delete()
+                .eq('id', dentists[i].id)
+            if (error)
+                throw error
+            navigation.navigate('Home')
+        } catch (error){
+            console.log(error)
         }
     }
 
@@ -165,9 +219,34 @@ export function EditProfile({navigation}){
     }, [isFocused])
 
     return (
-        <FormProvider {...methods}>
-            <Form isPatient={profile.is_patient} />
-            <Button title='Save changes' onPress={handleSubmit(onUpdate)} />
-        </FormProvider>
+        <ScrollView>
+            <FormProvider {...methods}>
+                <Form isPatient={profile.is_patient} isEdit={true} />
+                <Button title='Save changes' onPress={handleSubmit(onUpdate)} />
+                {!profile.is_patient && <>
+                    <Label>Dental Practitioners</Label>
+                    {dentists.map((dentist, i) => (
+                        <HomeView key={i}>
+                            <LabelTextInput name={`dentists[${i}].first_name`} style={{backgroundColor: 'white'}} 
+                                label='First Name' control={control} rules={{required: true}} />
+                            <LabelTextInput name={`dentists[${i}].last_name`} label='Last Name' 
+                                style={{backgroundColor: 'white'}} control={control} rules={{required: true}} />
+                            <LabelTextInput name={`dentists[${i}].prc_id`} label='PRC ID' style={{backgroundColor: 'white'}}
+                                control={control} rules={{required: true}} />
+                            <Button title='Update' onPress={() => updatePractitioner(i)} />
+                            <Button title='Delete' onPress={() => deletePractitioner(i)} />
+                        </HomeView>
+                    ))}
+                    <Label>New Dental Practitioner</Label>
+                    <LabelTextInput name={`first_name`} label='First Name'
+                        control={dentistControl} rules={{required: true}} />
+                    <LabelTextInput name={`last_name`} label='Last Name'
+                        control={dentistControl} rules={{required: true}} />
+                    <LabelTextInput name={`prc_id`} label='PRC ID'
+                        control={dentistControl} rules={{required: true}} />
+                    <Button title='Add' onPress={dentistHandleSubmit(addPractitioner)} />
+                </>}
+            </FormProvider>
+        </ScrollView>
     )
 }

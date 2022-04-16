@@ -8,8 +8,10 @@ const lapisLazuli = 'rgb(37, 101, 174)'
 const mayaBlue = 'rgb(102, 211, 250)'
 
 export function StyledTextInput(props){
+    const { style, ...rest} = props
+
     return (
-        <TextInput style={styles.input} {...props} />
+        <TextInput style={style ? [style, styles.input] : styles.input} {...rest} />
     )
 }
 
@@ -29,6 +31,14 @@ export function ListItemText(props){
 
     return (
         <Text style={style ? [style, {color: 'white'}] : {color: 'white'}}>{text}</Text>
+    )
+}
+
+export function Bold(props){
+    const text = props.children
+
+    return (
+        <ListItemText style={{fontWeight: 'bold'}}>{text}</ListItemText>
     )
 }
 

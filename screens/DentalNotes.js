@@ -7,7 +7,7 @@ import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
 
 import { Label, LabelTextInput } from '../components/LabelTextInput'
-import { Button, ListItemView, ListItemText } from '../components/StyledComponents'
+import { Button, ListItemView, ListItemText, Bold } from '../components/StyledComponents'
 
 const pediatricNumber = [
     'UpperLeft A', 'UpperLeft B', 'UpperLeft C', 'UpperLeft D', 'UpperLeft E',
@@ -92,26 +92,6 @@ export function DentalNotes({route, navigation}){
                 .eq('note_id', notes[i].id)
             if (deleteNoteToothErr)
                 throw deleteNoteToothErr
-            
-            if (notes[i].procedure?.length > 0){
-                const { error : deleteProcToothErr } = await supabase.from('procedure_tooth')
-                    .delete()
-                    .in('procedure_id', notes[i].procedure.map((proc) => proc.id))
-                if (deleteProcToothErr)
-                    throw deleteProcToothErr
-            }
-            
-            const { error : deleteNoteProcErr } = await supabase.from('note_procedure')
-                .delete()
-                .eq('note_id', notes[i].id)
-            if (deleteNoteProcErr)
-                throw deleteNoteProcErr
-
-            const { error : deleteProcErr } = await supabase.from('procedure')
-                .delete()
-                .in('id', notes[i].procedure.map((proc) => proc.id))
-            if (deleteProcErr)
-                throw deleteProcErr
         
             const { error } = await supabase.from('dental_note')
                 .delete()
@@ -208,17 +188,16 @@ export function DentalNotes({route, navigation}){
         <ScrollView> 
             {notes.map((note, i) => (
                 <ListItemView key={i}>
-                    <View>
-                        <ListItemText>Note: {note.note}</ListItemText>
-                        <ListItemText>Last visit: 
-                            {(new Date(Date.parse(note.visited_at))).toLocaleDateString()}</ListItemText>
+                    <View style={{flex: 4}}>
+                        <ListItemText><Bold>Note: </Bold>{note.note}</ListItemText>
+                        <ListItemText><Bold>Last visit: </Bold>{note.visited_at}</ListItemText>
                         <>
-                            { note.procedure?.length > 0 && <ListItemText>Procedures: {
+                            { note.procedure?.length > 0 && <ListItemText><Bold>Procedures: </Bold>{
                                 note.procedure.map((item, _) => item.name).join(', ')
                             } </ListItemText>}
                         </>
                         <>
-                            { note.note_tooth?.length > 0 && <ListItemText>Selected Teeth: {
+                            { note.note_tooth?.length > 0 && <ListItemText><Bold>Selected Teeth: </Bold>{
                                 isAdult ? 
                                 note.note_tooth.map((item, _) => (item.number + 1).toString()).join(', ') :
                                 note.note_tooth.map((item, _) => pediatricNumber[item.number]).join(', ')
@@ -226,12 +205,13 @@ export function DentalNotes({route, navigation}){
                         </>
                     </View> 
                     
-                    { !profile.is_patient && <Button onPress={() => deleteNote(i)} title='Delete' />}
+                    { !profile.is_patient && <Button style={{flex: 1}} onPress={() => deleteNote(i)} title='Delete' />}
                 </ListItemView>
             ))}
             {profile.is_patient == false && (
                 <View>
-                    <LabelTextInput name='note' label='Dental Note' control={control}/>
+                    <LabelTextInput name='note' label='Dental Note' control={control} 
+                        rules={{required: 'Field required'}}/>
                     { fields.map((field, i) => (
                         <View key={i}>
                             <Label>Procedures</Label>

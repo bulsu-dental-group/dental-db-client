@@ -79,19 +79,18 @@ export function Prescriptions({route, navigation}){
         <View>
             {prescriptions.map((prescription, i) => (
                 <ListItemView key={i}>
-                    <View>
+                    <View style={{flex: 4}}>
                         <ListItemText>Medicine: {prescription.medicine}</ListItemText>
                         <ListItemText>Homecare Note: {prescription.homecare_note}</ListItemText>
-                        <ListItemText>Noted at: 
-                            {new Date(Date.parse(prescription.created_at)).toLocaleDateString()}</ListItemText>
+                        <ListItemText>Created at: {prescription.created_at}</ListItemText>
                     </View>
-                    {!profile.is_patient && <Button title='Delete' onPress={() => deletePrescription(i)} />}
+                    {!profile.is_patient && <Button style={{flex: 1}} title='Delete' onPress={() => deletePrescription(i)} />}
                 </ListItemView>
             ))}
             {!profile.is_patient && (
                 <View>
-                    <LabelTextInput name='medicine' label='Medicine' control={control} />
-                    <LabelTextInput name='homecare_note' label='Homecare Note' 
+                    <LabelTextInput name='medicine' label='Medicine' control={control} rules={{required: 'Field required'}}/>
+                    <LabelTextInput name='homecare_note' label='Homecare Note' rules={{required: 'Field required'}}
                         control={control} />
                     <Button title='Add' onPress={handleSubmit(addPrescription)} />
                 </View>

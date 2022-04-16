@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
       borderRadius: 5,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 12
+      paddingVertical: 12,
     },
     menuBtnText : {
       color: 'white',

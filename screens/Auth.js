@@ -37,11 +37,10 @@ export function Auth({navigation}){
                     navigation.navigate('Home')
                 } else
                     navigation.navigate('Complete Signup')
+                reset()
             }
         } catch (error){
             setMsg(error.message)
-        } finally {
-            reset()
         }
     }
 

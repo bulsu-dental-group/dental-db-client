@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
 
-import { Button, ListItemView, ListItemText } from '../components/StyledComponents'
+import { Button, ListItemView, ListItemText, Bold } from '../components/StyledComponents'
 
 const pediatricNumber = [
     'UpperLeft A', 'UpperLeft B', 'UpperLeft C', 'UpperLeft D', 'UpperLeft E',
@@ -57,7 +57,8 @@ export function DentalProcedures({route, navigation}){
                     ),
                     procedure_tooth (
                         number
-                    )
+                    ),
+                    created_at
                 `)
                 .eq('patient_id', id)
             if (error)
@@ -89,6 +90,12 @@ export function DentalProcedures({route, navigation}){
             if (noteProcErr)
                 throw noteProcErr
 
+            const { error : treatProcErr } = await supabase.from('treatment_plan_procedure')
+                .delete()
+                .eq('procedure_id', procedures[i].id)
+            if (treatProcErr)
+                throw treatProcErr
+
             const { error } = await supabase.from('procedure')
                 .delete()
                 .eq('id', procedures[i].id)
@@ -111,21 +118,23 @@ export function DentalProcedures({route, navigation}){
             {procedures.map((procedure, i) => (
                 <ListItemView key={i} >
                     <View style={{flex: 5}}>
-                        <ListItemText><ListItemText style={{fontWeight: 'bold'}}>Name: </ListItemText>
+                        <ListItemText><Bold>Name: </Bold>
                             {procedure.name}</ListItemText>
                         {procedure.procedure_material.length > 0 && <>
-                            <ListItemText style={{fontWeight: 'bold'}}>Procedure materials: </ListItemText>
+                            <Bold>Procedure materials: </Bold>
                             {procedure.procedure_material.map((material, j) =>(
                                 <ListItemText key={j}>{material.name}</ListItemText>
                             ))}
                         </>}
                         {procedure.procedure_tooth.length > 0 && 
-                            <ListItemText style={{fontWeight: 'bold'}}>Selected teeth: 
+                            <ListItemText>
+                                <Bold>Selected teeth: </Bold>
                                 { isAdult ? procedure.procedure_tooth.map(tooth => tooth.number + 1).join(', ') :
                                     procedure.procedure_tooth.map(tooth => pediatricNumber[tooth.number]).join(', ')
                                 }
                             </ListItemText>
                         }
+                        <ListItemText><Bold>Created at: </Bold>{procedure.created_at}</ListItemText>
                     </View>
                     {!profile.is_patient && <>
                         <Button onPress={() => navigation.navigate('Edit Procedure', {
