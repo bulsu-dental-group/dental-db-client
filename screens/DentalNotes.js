@@ -52,7 +52,7 @@ export function DentalNotes({route, navigation}){
                 .limit(1)
             if (error)
                 throw error
-            if (route.params.goBack)
+            if (!route.params.selectedTeeth)
                 setValue('is_adult', data[0].is_adult)
         } catch (error){
             throw error
