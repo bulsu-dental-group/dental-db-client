@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useCallback } from 'react'
 import { useIsFocused } from '@react-navigation/native'
-import { ScrollView, View, Text } from 'react-native'
+import { ScrollView, View, RefreshControl } from 'react-native'
 import { useForm, useFieldArray } from 'react-hook-form'
 
 import { supabase } from '../supabase'
@@ -20,7 +20,7 @@ export function DentalNotes({route, navigation}){
     const isFocused = useIsFocused()
     const { profile } = useContext(ProfileContext)
     const [notes, setNotes] = useState([])
-    const { register, setValue, control, handleSubmit, watch, reset } = useForm({
+    const { setValue, control, handleSubmit, watch, reset } = useForm({
         defaultValues: {
             selected_teeth: [],
             is_adult: true
@@ -49,11 +49,10 @@ export function DentalNotes({route, navigation}){
             const { data, error } = await supabase.from('clinic_patient')
                 .select('is_adult')
                 .eq('patient_id', id)
-                .single()
+                .limit(1)
             if (error)
                 throw error
-            if (route.params.goBack)
-                setValue('is_adult', data.is_adult === true)
+            setValue('is_adult', data[0].is_adult)
         } catch (error){
             throw error
         }
@@ -184,8 +183,15 @@ export function DentalNotes({route, navigation}){
         }
     }, [route.params?.selectedTeeth])
 
-    return ( // Styling on Dental notes
-        <ScrollView> 
+    const [refreshing, setRefreshing] = useState(false)
+    
+    const onRefresh = useCallback(() => {
+        setRefreshing(true)
+        fetch().then(() => setRefreshing(false))
+    }, [])
+
+    return ( 
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}> 
             {notes.map((note, i) => (
                 <ListItemView key={i}>
                     <View style={{flex: 4}}>

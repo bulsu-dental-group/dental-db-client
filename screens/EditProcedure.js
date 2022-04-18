@@ -31,6 +31,8 @@ export function EditProcedure({route, navigation}){
     const selectedTeeth = watch('selectedTeeth')
     const isAdult = watch('isAdult')
 
+    const [patientId, setPatientId] = useState('')
+
     async function fetchProcedure(id){
         try {
             const { data, error } = await supabase.from('procedure')
@@ -41,7 +43,8 @@ export function EditProcedure({route, navigation}){
                     ),
                     procedure_tooth (
                         number
-                    )
+                    ),
+                    patient_id
                 `)
                 .eq('id', id)
                 .single()
@@ -54,6 +57,7 @@ export function EditProcedure({route, navigation}){
             })
             setValue('selectedTeeth', data.procedure_tooth.map((tooth) => tooth.number))
             setValue('isAdult', route.params.isAdult)
+            setPatientId(data.patient_id)
         } catch (error){
             console.log(error)
         }
@@ -61,6 +65,7 @@ export function EditProcedure({route, navigation}){
 
     async function updateProcedure(form){
         const procedure_id = route.params.procedure_id
+
         try {
             const { error : deleteProcTeethErr } = await supabase.from('procedure_tooth')
                 .delete()
@@ -96,6 +101,15 @@ export function EditProcedure({route, navigation}){
                 })))
             if (updateProcMaterialErr)
                 throw updateProcMaterialErr
+
+            const { error : isAdultUpdateErr } = await supabase.from('clinic_patient')
+                .update({is_adult: form.isAdult})
+                .match({
+                    patient_id: patientId,
+                    clinic_id: profile.clinic_id
+                })
+            if (isAdultUpdateErr)
+                throw isAdultUpdateErr
 
             navigation.navigate('Dental Procedures', {
                 id: procedure.patient_id

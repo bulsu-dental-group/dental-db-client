@@ -51,7 +51,7 @@ export const styles = StyleSheet.create({
     homeView : {
       backgroundColor: crayolaPeriwinkle,
       marginHorizontal: 10,
-      marginVertical: 20,
+      marginTop: 20,
       borderRadius: 5,
       padding: 10,
     }

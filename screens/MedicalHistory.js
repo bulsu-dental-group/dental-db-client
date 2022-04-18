@@ -324,18 +324,20 @@ function MedicalHistoryForm({control, isFemale}){
     }, [dates])
 
     return (
-        <ScrollView>
+        <ScrollView style={{padding: 5}}>
             <Label>Are you in a good health? </Label>
                 <Controller control={control} name='is_good_health'
                     render={({field}) => (
-                        <RadioButtonGroup selected={field.value} containerStyle={{flexDirection: 'row'}} onSelected={(value) => field.onChange(value)}>
+                        <RadioButtonGroup selected={field.value} containerStyle={{flexDirection: 'row'}} 
+                        onSelected={is_patient ? () => {} : (value) => field.onChange(value)}>
                             <RadioButtonItem value={true} label='Yes' />
                             <RadioButtonItem value={false} label='No' />
                         </RadioButtonGroup>
                     )}
                 />
             <Label>Are you under medical treatment now? </Label>
-            <RadioButtonGroup selected={showCondition} containerStyle={{flexDirection: 'row'}} onSelected={(value) => setShowCondition(value)}>
+            <RadioButtonGroup selected={showCondition} containerStyle={{flexDirection: 'row'}} 
+            onSelected={is_patient ? () => {} : (value) => field.onChange(value)} >
                 <RadioButtonItem value={true} label='Yes' />
                 <RadioButtonItem value={false} label='No' />
             </RadioButtonGroup>
@@ -344,7 +346,8 @@ function MedicalHistoryForm({control, isFemale}){
                     <Label>If so, what is the condition being treated?</Label>
                     {conditions.map((condition, i) => (
                         <View key={i}>
-                            <LabelTextInput name={`med_history_condition[${i}].name`} control={control} />
+                            <LabelTextInput name={`med_history_condition[${i}].name`} control={control} 
+                                editable={!is_patient} />
                             {!is_patient && <Button title='Delete' onPress={() => condition_remove(i)} />}
                         </View>
                     ))}
@@ -353,7 +356,7 @@ function MedicalHistoryForm({control, isFemale}){
             )}
             <Label>Have you ever had serious illness or surgical conditions? </Label>
             <RadioButtonGroup selected={showIllness} containerStyle={{flexDirection: 'row'}} 
-            onSelected={(value) => setShowIllness(value)}>
+            onSelected={is_patient ? () => {} : (value) => setShowIllness(value)}>
                 <RadioButtonItem value={true} label='Yes' />
                 <RadioButtonItem value={false} label='No' />
             </RadioButtonGroup>
@@ -362,7 +365,8 @@ function MedicalHistoryForm({control, isFemale}){
                     <Label>If so, what illness or operation?</Label>
                     {ill_ops.map((ill_op, i) => (
                         <View key={i}>
-                            <LabelTextInput name={`med_history_illness_surgery[${i}].name`} control={control} />
+                            <LabelTextInput name={`med_history_illness_surgery[${i}].name`} control={control} 
+                                editable={!is_patient} />
                             {!is_patient && <Button title='Delete' onPress={() => ill_op_remove(i)} />}
                         </View>
                     ))}
@@ -371,7 +375,7 @@ function MedicalHistoryForm({control, isFemale}){
             )}
             <Label>Have you ever been hospitalized? </Label>
             <RadioButtonGroup selected={showHospital} containerStyle={{flexDirection: 'row'}}  
-            onSelected={(value) => setShowHospital(value)}>
+            onSelected={is_patient ? () => {} : (value) => setShowHospital(value)}>
                 <RadioButtonItem value={true} label='Yes' />
                 <RadioButtonItem value={false} label='No' />
             </RadioButtonGroup>
@@ -392,7 +396,8 @@ function MedicalHistoryForm({control, isFemale}){
                             {!is_patient && <Button title='Change' onPress={() => setShowDates(
                                 showDates.map((showDate, j) => (i === j))
                             )} />}
-                            <LabelTextInput label='Reason' name={`med_history_hospitalized[${i}].reason`} control={control} />
+                            <LabelTextInput label='Reason' name={`med_history_hospitalized[${i}].reason`} control={control} 
+                                editable={!is_patient} />
                             {!is_patient && <Button title='Delete' onPress={() => {
                                 hospital_remove(i)
                                 // setShowDates(showDates.filter((showDate, j) => i !== j))
@@ -410,7 +415,7 @@ function MedicalHistoryForm({control, isFemale}){
             )}
             <Label>Are you taking any prescription/non-prescription medication? </Label>
             <RadioButtonGroup selected={showMedication} containerStyle={{flexDirection: 'row'}}
-            onSelected={(value) => setShowMedication(value)}>
+            onSelected={is_patient ? () => {} : (value) => setShowMedication(value)}>
                 <RadioButtonItem value={true} label='Yes' />
                 <RadioButtonItem value={false} label='No' />
             </RadioButtonGroup>
@@ -419,7 +424,8 @@ function MedicalHistoryForm({control, isFemale}){
                     <Label>If so, please specify</Label>
                     {medications.map((medication, i) => (
                         <View key={i} >
-                            <LabelTextInput name={`med_history_medication[${i}].name`} control={control} />
+                            <LabelTextInput name={`med_history_medication[${i}].name`} control={control} 
+                                editable={!is_patient} />
                             {!is_patient && <Button title='Delete' onPress={() => medication_remove(i)} />}
                         </View>
                     ))}
@@ -430,7 +436,7 @@ function MedicalHistoryForm({control, isFemale}){
                 <Controller control={control} name='has_tobaco'
                     render={({field}) => (
                         <RadioButtonGroup selected={field.value} containerStyle={{flexDirection: 'row'}} 
-                        onSelected={(value) => field.onChange(value)}>
+                        onSelected={is_patient ? () => {} : (value) => field.onChange(value)}>
                             <RadioButtonItem value={true} label='Yes' />
                             <RadioButtonItem value={false} label='No' />
                         </RadioButtonGroup>
@@ -440,7 +446,7 @@ function MedicalHistoryForm({control, isFemale}){
                 <Controller control={control} name='has_alcohol_drugs'
                     render={({field}) => (
                         <RadioButtonGroup selected={field.value} containerStyle={{flexDirection: 'row'}}
-                        onSelected={(value) => field.onChange(value)}>
+                        onSelected={is_patient ? () => {} : (value) => field.onChange(value)}>
                             <RadioButtonItem value={true} label='Yes' />
                             <RadioButtonItem value={false} label='No' />
                         </RadioButtonGroup>
@@ -452,20 +458,22 @@ function MedicalHistoryForm({control, isFemale}){
                     <Controller name={`medicine_allergy.${medAllergy.id}`} control={control}
                         defaultValue={false}
                         render={({field}) => (
-                            <Checkbox style={{marginHorizontal: 10}} value={field.value} onValueChange={field.onChange} />
+                            <Checkbox style={{marginHorizontal: 10}} value={field.value} 
+                            onValueChange={is_patient ? () => {} :field.onChange} />
                         )} />
                     <Label>{medAllergy.name}</Label>
                 </View>
             ))}
             <LabelTextInput label='Bleeding Time (minutes)' name='bleeding_time' control={control} 
-                rules={{pattern: {value: /[0-9]+/, message: 'Only numeric value'}}} keyboardType='numeric'/>
+                rules={{pattern: {value: /[0-9]+/, message: 'Only numeric value'}}} keyboardType='numeric'
+                editable={!is_patient} />
             { isFemale && (
                 <>
                     <Label>Are you pregnant? </Label>
                     <Controller control={control} name='is_pregnant'
                         render={({field}) => (
                             <RadioButtonGroup selected={field.value} containerStyle={{flexDirection: 'row'}}
-                            onSelected={(value) => field.onChange(value)}>
+                            onSelected={is_patient ? () => {} : (value) => field.onChange(value)}>
                                 <RadioButtonItem value={true} label='Yes' />
                                 <RadioButtonItem value={false} label='No' />
                             </RadioButtonGroup>
@@ -475,7 +483,7 @@ function MedicalHistoryForm({control, isFemale}){
                     <Controller control={control} name='is_nursing'
                         render={({field}) => (
                             <RadioButtonGroup selected={field.value} containerStyle={{flexDirection: 'row'}}
-                            onSelected={(value) => field.onChange(value)}>
+                            onSelected={is_patient ? () => {} : (value) => field.onChange(value)}>
                                 <RadioButtonItem value={true} label='Yes' />
                                 <RadioButtonItem value={false} label='No' />
                             </RadioButtonGroup>
@@ -485,7 +493,7 @@ function MedicalHistoryForm({control, isFemale}){
                     <Controller control={control} name='have_birth_pills'
                         render={({field}) => (
                             <RadioButtonGroup selected={field.value} containerStyle={{flexDirection: 'row'}}
-                            onSelected={(value) => field.onChange(value)}>
+                            onSelected={is_patient ? () => {} : (value) => field.onChange(value)}>
                                 <RadioButtonItem value={true} label='Yes' />
                                 <RadioButtonItem value={false} label='No' />
                             </RadioButtonGroup>
@@ -493,14 +501,16 @@ function MedicalHistoryForm({control, isFemale}){
                     />
                 </>
             )}
-            <LabelTextInput label='Blood Pressure' name='blood_pressure' control={control} />
+            <LabelTextInput label='Blood Pressure' name='blood_pressure' control={control} 
+                editable={!is_patient}/>
             <Label>Do you have or have you had any of the following? Check which apply</Label>
             {medOptions.map((medOption, i) => (
                 <View key={i} style={{flexDirection : 'row'}}>
                     <Controller name={`med_history_option.${medOption.id}`} control={control}
                         defaultValue={false}
                         render={({field}) => (
-                            <Checkbox style={{marginHorizontal: 10}} value={field.value} onValueChange={field.onChange} />
+                            <Checkbox style={{marginHorizontal: 10}} value={field.value} 
+                            onValueChange={is_patient ? () => {} :field.onChange} />
                         )} />
                     <Label>{medOption.name}</Label>
                 </View>

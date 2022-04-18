@@ -61,7 +61,7 @@ export function Auth({navigation}){
     }
 
     return ( // Rules, password r
-        <View>
+        <View style={{padding: 5}}>
             <LabelTextInput name='email' label='Email' control={control} rules={{required: 'This field is required'}}/>
             <LabelTextInput name='password' label='Password' control={control}
                 rules={{required: 'This field is required'}} secureTextEntry={true}/>

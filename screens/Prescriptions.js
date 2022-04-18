@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useCallback } from 'react'
 import { useIsFocused } from '@react-navigation/native'
-import { View } from 'react-native'
+import { View, ScrollView, RefreshControl } from 'react-native'
 import { useForm } from 'react-hook-form'
 
 import { supabase } from '../supabase'
@@ -65,18 +65,28 @@ export function Prescriptions({route, navigation}){
         }
     }
 
-    useEffect(() => {
-        if (isFocused){
-            if (profile.is_patient)
+    async function fetch(){
+        if (profile.is_patient)
                 fetchPrescriptions(profile.patient_id)
             else
                 fetchPrescriptions(route.params.id)
+    }
+
+    useEffect(() => {
+        if (isFocused){
+            fetch()
         }
     }, [isFocused])
 
+    const [refreshing, setRefreshing] = useState(false)
+    
+    const onRefresh = useCallback(() => {
+        setRefreshing(true)
+        fetch().then(() => setRefreshing(false))
+    }, [])
 
     return (
-        <View>
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             {prescriptions.map((prescription, i) => (
                 <ListItemView key={i}>
                     <View style={{flex: 4}}>
@@ -95,6 +105,6 @@ export function Prescriptions({route, navigation}){
                     <Button title='Add' onPress={handleSubmit(addPrescription)} />
                 </View>
             )}
-        </View>
+        </ScrollView>
     )
 }

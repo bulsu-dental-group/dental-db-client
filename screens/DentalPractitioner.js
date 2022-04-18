@@ -1,16 +1,17 @@
-import { useEffect, useState, useContext } from 'react'
-import { Button, View, Text } from 'react-native'
+import { useEffect, useState, useContext, useCallback } from 'react'
+import { Button, RefreshControl, Text, ScrollView } from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
 import RNPickerSelect from 'react-native-picker-select'
 
 import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
-import { HomeView, ListItemText } from '../components/StyledComponents'
+import { HomeView } from '../components/StyledComponents'
+import { Label } from '../components/LabelTextInput'
 
 export function DentalPractitioner({route, navigation}){
     const { profile } = useContext(ProfileContext)
     const isFocused = useIsFocused()
-    const [assigned, setAssigned] = useState({})
+    const [assigned, setAssigned] = useState([])
     const [practitioners, setPractitioners] = useState([])
     const [pickPractitioner, setPickPractitioner] = useState({})
 
@@ -18,6 +19,9 @@ export function DentalPractitioner({route, navigation}){
         try {
             const { data, error } = await supabase.from('clinic_patient')
                 .select(`
+                    clinic (
+                        name
+                    ),
                     dental_practitioner (
                         id,
                         first_name,
@@ -26,12 +30,11 @@ export function DentalPractitioner({route, navigation}){
                     )
                 `)
                 .eq('patient_id', patient_id)
-                .single()
             if (error)
                 throw error
             console.log(data)
             if (data)
-                setAssigned(data.dental_practitioner)
+                setAssigned(data.map((a) => ({...a.clinic, dental_practitioner: a.dental_practitioner})))
         } catch (error){
             console.log(error)
         }
@@ -68,7 +71,7 @@ export function DentalPractitioner({route, navigation}){
             if (error)
                 throw error
             if (data)
-                setAssigned({...pickPractitioner})
+                setAssigned([{dental_practitioner: pickPractitioner, name: assigned[0].name}])
         } catch (error){
             console.log(error)
         }
@@ -89,17 +92,31 @@ export function DentalPractitioner({route, navigation}){
             fetch()
     }, [isFocused])
 
+    const [refreshing, setRefreshing] = useState(false)
+    
+    const onRefresh = useCallback(() => {
+        setRefreshing(true)
+        fetch().then(() => setRefreshing(false))
+    }, [])
+
     return (
-        <HomeView>
-            <Text>Assigned Dental Practitioner</Text>
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             {assigned ? (
                 <>
-                    <Text>Name: {assigned.first_name} {assigned.last_name}</Text>
-                    <Text>PRC ID: {assigned.prc_id}</Text>
+                    {assigned.map((a, i) => (
+                        <HomeView key={i}>
+                            {a.dental_practitioner ? (<>
+                                <Text>Name: {a.dental_practitioner.first_name} {a.dental_practitioner.last_name}</Text>
+                                <Text>PRC ID: {a.dental_practitioner.prc_id}</Text>
+                            </>) :
+                            <Text>No assigned dental practitioner from this clinic yet</Text>}
+                            <Text>Clinic: {a.name}</Text>
+                        </HomeView>
+                    ))}
                 </>
             ) : <Text>No assigned dental practitioner yet</Text> }
             {!profile.is_patient && (
-                <>
+                <HomeView>
                     <Text>Change assigned dental practitioner</Text>
                     <RNPickerSelect value={pickPractitioner}
                         onValueChange={(item, i) => setPickPractitioner(item)}
@@ -109,8 +126,8 @@ export function DentalPractitioner({route, navigation}){
                             value: practitioner
                         }))} />
                     <Button title='Update' onPress={updateAssigned} />
-                </>
+                </HomeView>
             )}
-        </HomeView>
+        </ScrollView>
     )
 }

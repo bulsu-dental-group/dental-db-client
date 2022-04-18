@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react'
-import { Button, View } from 'react-native'
+import { Button, View, ScrollView } from 'react-native'
 import { useForm, FormProvider } from 'react-hook-form'
 
 import { supabase } from '../supabase'
@@ -142,12 +142,14 @@ export function CompleteSignup({navigation}){
 
     return (
         <FormProvider {...methods}>
-            <Label>Complete your sign-up by filling up the form below</Label>
-            <View style={{flexDirection: 'row'}}>
-                <Button onPress={() => setIsPatient(true)} title="Patient" style={{flex: 1, marginHorizontal: 5}}/>
-                <Button onPress={() => setIsPatient(false)} title="Clinic" style={{flex: 1, marginHorizontal: 5}}/>
-            </View>
-            <Form isPatient={isPatient}/>
+            <ScrollView>
+                <Label>Complete your sign-up by filling up the form below</Label>
+                <View style={{flexDirection: 'row'}}>
+                    <Button onPress={() => setIsPatient(true)} title="Patient" style={{flex: 1, marginHorizontal: 5}}/>
+                    <Button onPress={() => setIsPatient(false)} title="Clinic" style={{flex: 1, marginHorizontal: 5}}/>
+                </View>
+                <Form isPatient={isPatient}/>
+            </ScrollView>
             <Button onPress={handleSubmit(onComplete)} title="Complete sign-up" />
         </FormProvider>
     )

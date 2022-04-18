@@ -1,7 +1,6 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useCallback } from 'react'
 import { useIsFocused } from '@react-navigation/native'
-import { ScrollView, View, Text } from 'react-native'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { ScrollView, View, RefreshControl } from 'react-native'
 
 import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
@@ -36,11 +35,10 @@ export function DentalProcedures({route, navigation}){
             const { data, error } = await supabase.from('clinic_patient')
                 .select('is_adult')
                 .eq('patient_id', id)
-                .single()
+                .limit(1)
             if (error)
                 throw error
-            if (route.params.goBack)
-                setIsAdult(data.is_adult === true)
+            setIsAdult(data[0].is_adult)
         } catch (error){
             throw error
         }
@@ -64,7 +62,7 @@ export function DentalProcedures({route, navigation}){
             if (error)
                 throw error
             setProcedures(data)
-            console.log(data)
+            // console.log(data)
         } catch (error){
             console.log(error)
         }
@@ -113,8 +111,15 @@ export function DentalProcedures({route, navigation}){
             fetch()
     }, [isFocused])
 
+    const [refreshing, setRefreshing] = useState(false)
+    
+    const onRefresh = useCallback(() => {
+        setRefreshing(true)
+        fetch().then(() => setRefreshing(false))
+    }, [])
+
     return (
-        <ScrollView>
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             {procedures.map((procedure, i) => (
                 <ListItemView key={i} >
                     <View style={{flex: 5}}>
