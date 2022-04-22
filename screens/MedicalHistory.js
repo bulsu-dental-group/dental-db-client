@@ -32,6 +32,7 @@ export function MedicalHistory({route, navigation}){
         }
     })
     const [isFemale, setIsFemale] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     async function fetchIsFemale(patient_id){
         try {
@@ -117,6 +118,7 @@ export function MedicalHistory({route, navigation}){
     async function updateHistory(form){
         const patient_id = profile.is_patient ? profile.patient_id : route.params.id
         try {
+            setLoading(true)
             // Update non-array attributes
             const { data : medHistory, error : historyError } = await supabase.from('medical_history')
                 .update({
@@ -226,6 +228,8 @@ export function MedicalHistory({route, navigation}){
             navigation.goBack()
         } catch (error){
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -244,7 +248,8 @@ export function MedicalHistory({route, navigation}){
 
     return (
         <View>
-            {!profile.is_patient && <Button title='Save changes' onPress={handleSubmit(updateHistory)} />}
+            {!profile.is_patient && <Button title='Save changes' onPress={handleSubmit(updateHistory)} 
+                disabled={loading} />}
             <MedicalHistoryForm control={control} isFemale={isFemale}  />
         </View>
     )

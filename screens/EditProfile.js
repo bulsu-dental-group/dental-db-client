@@ -1,4 +1,4 @@
-import { useEffect, useContext } from 'react'
+import { useEffect, useContext, useState } from 'react'
 import { useIsFocused } from '@react-navigation/native'
 import { Button, View, ScrollView } from 'react-native'
 import { useForm, FormProvider } from 'react-hook-form'
@@ -29,6 +29,7 @@ export function EditProfile({navigation}){
             prc_id: ''
         }
     })
+    const [loading, setLoading] = useState(false)
 
     async function fetchMeta(){
         try {
@@ -105,6 +106,7 @@ export function EditProfile({navigation}){
 
     async function onUpdate(form){
         try {
+            setLoading(true)
             if (profile.is_patient){
                 const { data : patient, patientErr } = await supabase.from('patient').update(
                     {
@@ -112,6 +114,7 @@ export function EditProfile({navigation}){
                         'last_name'     : form.last_name,
                         'gender'        : form.gender,
                         'contact_number': form.contact_number,
+                        'birth_date'    : form.birth_date,
                         'street'        : form.street,
                         'city'          : form.city,
                         'province'      : form.province,
@@ -155,12 +158,14 @@ export function EditProfile({navigation}){
         } catch (error){
             console.log(error)
         } finally {
+            setLoading(false)
             navigation.navigate('Home')
         }
     }
 
     async function addPractitioner(form){
         try {
+            setLoading(true)
             const { error } = await supabase.from('dental_practitioner')
                 .insert([{
                     first_name: form.first_name,
@@ -173,6 +178,8 @@ export function EditProfile({navigation}){
             navigation.navigate('Home')
         } catch (error){
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -197,7 +204,7 @@ export function EditProfile({navigation}){
     async function deletePractitioner(i){
         try {
             const { error : deletePracPatientsErr } = await supabase.from('clinic_patient')
-                .delete()
+                .update({dental_practitioner_id: ''})
                 .eq('dental_practitioner_id', dentists[i].id)
             if (deletePracPatientsErr)
                 throw deletePracPatientsErr
@@ -222,7 +229,7 @@ export function EditProfile({navigation}){
         <ScrollView>
             <FormProvider {...methods}>
                 <Form isPatient={profile.is_patient} isEdit={true} />
-                <Button title='Save changes' onPress={handleSubmit(onUpdate)} />
+                <Button title='Save changes' onPress={handleSubmit(onUpdate)} disabled={loading} />
                 {!profile.is_patient && <>
                     <Label>Dental Practitioners</Label>
                     {dentists.map((dentist, i) => (
@@ -244,7 +251,7 @@ export function EditProfile({navigation}){
                         control={dentistControl} rules={{required: true}} />
                     <LabelTextInput name={`prc_id`} label='PRC ID'
                         control={dentistControl} rules={{required: true}} />
-                    <Button title='Add' onPress={dentistHandleSubmit(addPractitioner)} />
+                    <Button title='Add' onPress={dentistHandleSubmit(addPractitioner)} disabled={loading} />
                 </>}
             </FormProvider>
         </ScrollView>

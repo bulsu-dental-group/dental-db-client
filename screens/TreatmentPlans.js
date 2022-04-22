@@ -13,8 +13,9 @@ export function TreatmentPlans({route, navigation}){
     const isFocused = useIsFocused()
     const [treatmentPlans, setTreatmentPlans] = useState([])
     const { profile } = useContext(ProfileContext)
-    const { handleSubmit, control } = useForm()
+    const { handleSubmit, control, reset } = useForm()
     const { fields, append, remove } = useFieldArray({name: 'procedures', control: control})
+    const [loading, setLoading] = useState(false)
 
     async function fetchTreatment(patient_id){
         try {
@@ -41,6 +42,7 @@ export function TreatmentPlans({route, navigation}){
 
     async function addTreatmentPlan(form){
         try {
+            setLoading(true)
             const { data : treatment, error : treatmentErr } = await supabase.from('treatment_plan')
                 .insert({
                     name: form.name,
@@ -71,13 +73,22 @@ export function TreatmentPlans({route, navigation}){
                 ...treatment,
                 procedure : procedures
             }])
+            reset()
         } catch (error){
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
     async function deleteTreatmentPlan(i){
         try {
+            const { error : deleteTreatProcErr } = await supabase.from('treatment_plan_procedure')
+                .delete()
+                .eq('treatment_plan_id', treatmentPlans[i].id)
+            if (deleteTreatProcErr)
+                throw deleteTreatProcErr
+
             const { error : deleteTreatErr } = await supabase.from('treatment_plan')
                 .delete()
                 .eq('id', treatmentPlans[i].id)
@@ -141,7 +152,7 @@ export function TreatmentPlans({route, navigation}){
                         </View>
                     ))}
                     <Button title='Add procedure' onPress={() => append({name: ''})} />
-                    <Button title='Add treatment plan' onPress={handleSubmit(addTreatmentPlan)} />
+                    <Button title='Add treatment plan' onPress={handleSubmit(addTreatmentPlan)} disabled={loading} />
                 </View>
             )}
         </ScrollView>

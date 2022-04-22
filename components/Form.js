@@ -50,7 +50,8 @@ export function Form({isPatient, isEdit}){
                 {showDate && <Controller control={control} render={({ field: {onChange, value}}) => (
                     <DateTimePicker mode='date' value={value} onChange={(event, date) => {
                         setShowDate(false)
-                        onChange(date)
+                        if (date)
+                            onChange(date)
                     }} />
                 )} name="birth_date" />}
                 <Button title='Change date' onPress={() => setShowDate(true)} />

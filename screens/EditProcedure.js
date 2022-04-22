@@ -32,6 +32,7 @@ export function EditProcedure({route, navigation}){
     const isAdult = watch('isAdult')
 
     const [patientId, setPatientId] = useState('')
+    const [loading, setLoading] = useState(false)
 
     async function fetchProcedure(id){
         try {
@@ -65,8 +66,8 @@ export function EditProcedure({route, navigation}){
 
     async function updateProcedure(form){
         const procedure_id = route.params.procedure_id
-
         try {
+            setLoading(true)
             const { error : deleteProcTeethErr } = await supabase.from('procedure_tooth')
                 .delete()
                 .eq('procedure_id', procedure_id)
@@ -116,6 +117,8 @@ export function EditProcedure({route, navigation}){
             })
         } catch (error){
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -150,7 +153,7 @@ export function EditProcedure({route, navigation}){
                     selectedTeeth: selectedTeeth,
                     goBack: 'Edit Procedure'
                 })} />
-            <Button title='Update' onPress={handleSubmit(updateProcedure)} />
+            <Button title='Update' onPress={handleSubmit(updateProcedure)} disabled={loading} />
         </ScrollView>
     )
 }

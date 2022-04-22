@@ -12,8 +12,9 @@ import { Button, ListItemText, ListItemView } from '../components/StyledComponen
 export function Prescriptions({route, navigation}){
     const [prescriptions, setPrescriptions] = useState([])
     const isFocused = useIsFocused()
-    const { control, handleSubmit } = useForm()
+    const { control, handleSubmit, reset } = useForm()
     const { profile } = useContext(ProfileContext)
+    const [loading, setLoading] = useState(false)
 
     async function fetchPrescriptions(patient_id){
         try {
@@ -36,6 +37,7 @@ export function Prescriptions({route, navigation}){
 
     async function addPrescription(form){
         try {
+            setLoading(true)
             const { data, error } = await supabase.from('prescription')
                 .insert([{
                     medicine: form.medicine,
@@ -47,8 +49,11 @@ export function Prescriptions({route, navigation}){
                 console.log(error)
             if (data)
                 setPrescriptions([...prescriptions, data])
+            reset()
         } catch (error){
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -102,7 +107,7 @@ export function Prescriptions({route, navigation}){
                     <LabelTextInput name='medicine' label='Medicine' control={control} rules={{required: 'Field required'}}/>
                     <LabelTextInput name='homecare_note' label='Homecare Note' rules={{required: 'Field required'}}
                         control={control} />
-                    <Button title='Add' onPress={handleSubmit(addPrescription)} />
+                    <Button title='Add' onPress={handleSubmit(addPrescription)} disabled={loading} />
                 </View>
             )}
         </ScrollView>

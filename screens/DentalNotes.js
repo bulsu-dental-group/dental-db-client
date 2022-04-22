@@ -29,6 +29,8 @@ export function DentalNotes({route, navigation}){
     const isAdult = watch('is_adult')
     const selectedTeeth = watch('selected_teeth')
 
+    const [loading, setLoading] = useState(false)
+
     const { fields, append, remove } = useFieldArray({
         name: 'procedures',
         control: control
@@ -87,6 +89,12 @@ export function DentalNotes({route, navigation}){
 
     async function deleteNote(i){
         try {
+            const { error : deleteNoteProcErr } = await supabase.from('note_procedure')
+                .delete()
+                .eq('note_id', notes[i].id)
+            if (deleteNoteProcErr)
+                throw deleteNoteProcErr
+
             const { error : deleteNoteToothErr } = await supabase.from('note_tooth')
                 .delete()
                 .eq('note_id', notes[i].id)
@@ -107,6 +115,7 @@ export function DentalNotes({route, navigation}){
 
     async function addNote(form){
         try {
+            setLoading(true)
             const { data : note, error : noteErr } = await supabase.from('dental_note')
                 .insert([{
                     'note' : form.note,
@@ -168,6 +177,8 @@ export function DentalNotes({route, navigation}){
             reset()
         } catch (error){
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -239,7 +250,7 @@ export function DentalNotes({route, navigation}){
                             goBack: 'Dental Notes'
                         })} />
                     </View>
-                    <Button title='Add dental note' onPress={handleSubmit(addNote)} />
+                    <Button title='Add dental note' onPress={handleSubmit(addNote)} disabled={loading}/>
                 </View>
             )}
         </ScrollView>
