@@ -342,7 +342,7 @@ function MedicalHistoryForm({control, isFemale}){
                 />
             <Label>Are you under medical treatment now? </Label>
             <RadioButtonGroup selected={showCondition} containerStyle={{flexDirection: 'row'}} 
-            onSelected={is_patient ? () => {} : (value) => field.onChange(value)} >
+            onSelected={is_patient ? () => {} : (value) => setShowCondition(value)} >
                 <RadioButtonItem value={true} label='Yes' />
                 <RadioButtonItem value={false} label='No' />
             </RadioButtonGroup>

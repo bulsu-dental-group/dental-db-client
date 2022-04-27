@@ -23,6 +23,7 @@ export function DentalNotes({route, navigation}){
     const { setValue, control, handleSubmit, watch, reset } = useForm({
         defaultValues: {
             selected_teeth: [],
+            procedures: [],
             is_adult: true
         }
     })
@@ -161,20 +162,25 @@ export function DentalNotes({route, navigation}){
                 throw noteTeethErr
 
             const { error : isAdultErr } = await supabase.from('clinic_patient')
-                .update('is_adult', form.is_adult)
+                .update({'is_adult': form.is_adult})
                 .match({
                     'patient_id': route.params.id,
                     'clinic_id' : profile.clinic_id
                 })
             if (isAdultErr)
                 throw isAdultErr
+            const newIsAdult = form.is_adult
 
             setNotes([...notes, {
                 ...note,
                 procedure: procedures,
                 note_tooth: noteTeeth
             }])
-            reset()
+            reset({
+                'is_adult' : newIsAdult,
+                selected_teeth: [],
+                procedures: []
+            })
         } catch (error){
             console.log(error)
         } finally {
