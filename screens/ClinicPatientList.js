@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from 'react'
 import { useIsFocused } from '@react-navigation/native'
-import { View, Pressable } from 'react-native'
+import { View, Pressable, ScrollView } from 'react-native'
 import * as Linking from 'expo-linking'
 import Checkbox from 'expo-checkbox'
 
@@ -120,7 +120,7 @@ export function ClinicPatientList({navigation}){
     }, [isFocused])
 
     return (
-        <View>
+        <ScrollView>
             <HomeView>
                 <View style={{flexDirection: 'row', marginHorizontal: 10}} >
                     <Label>Search: </Label>
@@ -149,6 +149,6 @@ export function ClinicPatientList({navigation}){
                     <Button title='Delete' onPress={() => deletePatient(patient.id)} style={{flex: 2}} />
                 </ListItemView>
             ))}
-        </View>
+        </ScrollView>
     )
 }
