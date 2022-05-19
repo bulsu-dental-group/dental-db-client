@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from 'react'
-import { useIsFocused } from '@react-navigation/native'
-import { View, Text } from 'react-native'
+import { useEffect, useState, useContext, useCallback } from 'react'
+import { useIsFocused,  } from '@react-navigation/native'
+import { View, Text, RefreshControl, ScrollView } from 'react-native'
 
 import { supabase } from '../supabase'
 import ProfileContext from '../components/ProfileContext'
@@ -65,8 +65,15 @@ export function AllPatients({navigation}){
             fetch()
     }, [isFocused])
 
+    const [refreshing, setRefreshing] = useState(false)
+    
+    const onRefresh = useCallback(() => {
+        setRefreshing(true)
+        fetch().then(() => setRefreshing(false))
+    }, [])
+
     return (
-        <View>
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={{flexDirection: 'row', margin: 10}}>
                 <Text>Search: </Text>
                 <StyledTextInput style={{flex: 4}} onChangeText={text => filterName(text)} />
@@ -80,6 +87,6 @@ export function AllPatients({navigation}){
                     }
                 </ListItemView>
             ))}
-        </View>
+        </ScrollView>
     )
 }
